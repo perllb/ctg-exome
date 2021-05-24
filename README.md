@@ -1,7 +1,7 @@
 # ctg-exome 
 ## nextflow pipeline for exome analysis with Illumina Dragen server
 
-### The following steps are performed by the pipeline:
+## The following steps are performed by the pipeline:
 
 * `Demultiplexing` (dragen bcl-conversion): Converts raw basecalls to fastq, and demultiplex samples based on index. Adapters sequences are trimmed if added to samplesheet [Settings].
 * `Alignment` and `Variant calling` (dragen align + calling): Fastq from each sample is aligned to the reference genome. Variants (SNV) are called in the target region. 
@@ -28,7 +28,7 @@ Currently supports the following references
         * dragen metrics: Summarized metrics for each sample.
         * multiqc output: Summarizing FastQC, dragen metrics and demultiplexing (https://multiqc.info/)
 
-### Example Samplesheet
+## Example Samplesheet
 ```
 [Header]
 IEMFileVersion,5
@@ -63,9 +63,12 @@ Note that the format is standard IEM generated sheet, with additional columns:
 | panel | comprehensive / core : Twist-Comprehensive or Twist-Core panel bed files are embedded in container |
 | analyze | y / n : set 'y' if alignment + vc should be performed. If 'n' then only demux and QC |
 
+## Container
+- `ngs-tools` Singularity container contain NGS-related tools, embedded in the repo: 
+https://github.com/perllb/ctg-wgs/tree/master/container 
 
-### Specs
-- Dragen version: 3.7 
+## Specs
+- Dragen version: 3.8
     - User guide: (https://support.illumina.com/content/dam/illumina-support/documents/documentation/software_documentation/dragen-bio-it/Illumina-DRAGEN-Bio-IT-Platform-User-Guide-1000000141465-00.pdf). 
     - Relase notes: (https://support.illumina.com/content/dam/illumina-support/documents/downloads/software/dragen/Illumina-DRAGEN-Bio-IT-Platform-3.7-Release-Notes-1000000142362-v00.pdf)
 - Reference genome: hg38
