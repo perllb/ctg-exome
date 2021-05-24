@@ -1,0 +1,53 @@
+Bootstrap:docker
+From:nfcore/base
+
+%labels
+	MAINTAINER Per Brattås <per.brattas@med.lu.se>
+	DESCRIPTION Container for various sequence analysis sw
+	VERSION 0.0.1
+
+%environment
+	PATH=/opt/bin:/opt/conda/envs/rnatools/bin/:$PATH
+
+%files
+	environment.yml /
+	bcl2fastq2-v2.20.0.422-Source.tar.gz /opt/
+	 
+
+%post
+	rm -rf /var/lib/apt/lists/*
+	apt -y clean
+	apt -y update
+	apt -y install libz-dev build-essential gettext cmake libxml2-dev libcurl4-openssl-dev libssl-dev make libbz2-dev libboost-dev python3-pip sudo
+
+	mkdir -p /usr/share/man/man1
+
+	/opt/conda/bin/conda env create -f /environment.yml
+
+	# Setup bcl2fastq
+	export TMP=/tmp
+	export SOURCE=/tmp${TMP}/bcl2fastq
+	export BUILD=${TMP}/bcl2fastq2-v2.20.0-build
+	export INSTALL_DIR=${SINGULARITY_ROOTFS}/opt/bcl2fastq2-v2.20.0
+
+
+        mkdir -p /opt/bcl2fastq
+        cd /opt/bcl2fastq
+	mkdir -p build
+
+        export C_INCLUDE_PATH=/usr/include/x86_64-linux-gnu
+
+        tar -xzvf /opt/bcl2fastq2-v2.20.0.422-Source.tar.gz
+        chmod ugo+x bcl2fastq/src/configure
+	chmod ugo+x bcl2fastq/src/cmake/bootstrap/installCmake.sh
+	cd build
+	../bcl2fastq/src/configure --prefix=/opt/
+	make
+	make install
+
+
+	# Setup multiqc
+	pip3 install multiqc
+
+	
+	   
