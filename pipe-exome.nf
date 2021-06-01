@@ -97,55 +97,7 @@ process parsesheet {
 	demux == 'y'
 
 	"""
-#!/opt/conda/bin/python
-
-# import libs
-import csv
-
-with open(\'$newsheet\', 'w', newline='') as outfile:
-    writer = csv.writer(outfile)
-
-    with open(\'$sheet\', 'r') as infile:
-        my_reader = csv.reader(infile, delimiter=',')
-        # row counter to define first line
-        row_idx=0                # if first line - get index of the 3 columns needed
-        datareached=0
-	
-        for row in my_reader:
-            # read header
-            if datareached == 0:
-                if 'Adapter' in row:
-                    writer.writerow(['AdapterRead1',row[1]])
-                else:
-                    writer.writerow(row)
-
-            # if [Data] reached
-            if datareached == 1:
-                datareached=2
-
-            if datareached == 2:
-                if row_idx == 0:
-                    sididx  = row.index('Sample_ID')
-                    idxidx  = row.index('index')
-                    idx2idx = row.index('index2')
-                    projidx = row.index('Sample_Project')
-                    row_idx = 1
-                    if \'$index\' == 'dual':
-                        writer.writerow(['Sample_ID','Sample_Name','Sample_Plate','Sample_Well','index','index2','Sample_Project'])
-                    else:
-                        writer.writerow(['Sample_ID','index','Sample_Project'])
-                else:
-                    currsid = row[sididx]
-                    curridx = row[idxidx]
-                    curridx2 = row[idx2idx]
-                    currproj = row[projidx]
-
-                    if \'$index\' == 'dual':
-                        writer.writerow([currsid,currsid,'','',curridx,curridx2,currproj])
-                    else:
-                        writer.writerow([currsid,curridx,currproj])
-            if '[Data]' in row:
-                datareached=1             
+python $basedir/bin/ctg-parse-samplesheet.dragen-exome.py -s $sheet -o $newsheet -i $index
 	"""
 }
 
@@ -267,22 +219,34 @@ process dragen_align_vc {
     outdir=${OUTDIR}/${projid}/dragen/${sid}
     mkdir -p \$outdir
 
+    echo "R1: '\${R1}'"
+    echo "R2: '\${R2}'"
+    echo "sid: '${sid}'"
+    echo "padding: '${params.padding}'"
+    echo "outdir: '\${outdir}'"
+    echo "targetfile: '\${targetfile}'"
+   
     /opt/edico/bin/dragen -f -r /staging/human/reference/$ref \\
         -1 \${R1} \\
-    	-2 \${R2} \\
-	--RGID ${projid}_${sid} \\
-    	--RGSM $sid \\
-	--intermediate-results-dir /staging/tmp/ \\
+        -2 \${R2} \\
+        --RGID ${projid}_${sid} \\
+        --RGSM $sid \\
+        --intermediate-results-dir /staging/tmp/ \\
         --enable-map-align true \\
         --enable-map-align-output true \\
+        --remove-duplicates true \\
         --vc-target-bed \$targetfile \\
         --vc-target-bed-padding ${params.padding} \\
         --output-format bam \\
         --output-directory \$outdir \\
         --enable-variant-caller true \\
         --enable-sv true \\
-        --output-file-prefix $sid
-    
+        --output-file-prefix $sid \\
+        --qc-coverage-region-1 \$targetfile \\
+	--qc-coverage-region-padding-1 ${params.padding} \\
+        --qc-coverage-ignore-overlaps true \\
+        --qc-coverage-filters-1 "mapq<30,bq<20"
+	    
     """
 }
 
