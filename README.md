@@ -29,7 +29,10 @@ Default padding is 20bp. Can be altered in nextflow.config.
 ### Output:
 * CTG-output
     * `fastq`: Contains raw fastq files from demultiplexing.
-    * `dragen`: Output from dragen alignment + variant calling. Here you find the .bam files for the aligned sample and .vcf files. The *hard-filtered.vcf contain the variants that passed filters.
+    * `dragen`: 
+      * `metrics`: Output from dragen alignment + variant calling. Contains metrics from alignment and calling, raw .vcfs and .bam files. 
+         * `sv`: Output metrics and candidate vcf from sv calling.       
+      * `vcf`: The *hard-filtered.vcf contain the SNV variants (and some SVs) that passed filters. DiploidSV.vcf contain SVs that passes the candidate filters. Annotated and filtered vcf are also written here.
     * `qc`: Quality control output. 
         * fastqc output (https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
         * dragen metrics: Summarized metrics for each sample.
