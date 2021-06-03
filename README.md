@@ -32,7 +32,10 @@ Default padding is 20bp. Can be altered in nextflow.config.
     * `dragen`: 
       * `metrics`: Output from dragen alignment + variant calling. Contains metrics from alignment and calling, raw .vcfs and .bam files. 
          * `sv`: Output metrics and candidate vcf from sv calling.       
-      * `vcf`: The *hard-filtered.vcf contain the SNV variants (and some SVs) that passed filters. DiploidSV.vcf contain SVs that passes the candidate filters. Annotated and filtered vcf are also written here.
+      * `vcf`: 
+         * `*hard-filtered.vcf` contain the SNV variants (and some SVs) that passed filters. 
+         * `*DiploidSV.vcf` contain SVs that passes the candidate filters. 
+         * Annotated and filtered vcf are also written here.
     * `qc`: Quality control output. 
         * fastqc output (https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
         * dragen metrics: Summarized metrics for each sample.
