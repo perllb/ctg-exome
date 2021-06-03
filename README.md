@@ -59,8 +59,7 @@ Adapter,AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
 AdapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
 
 [Data]
-Sample_ID,Sample_Name,Sample_Plate,Sample_Well,Index_Plate_Well,I7_Index_ID,index,I5_Index_ID,index2,Sample_Project,Sample_Species,Sample_Ref,panel,a\
-nalyze                                                                                                                                                
+Sample_ID,Sample_Name,Sample_Plate,Sample_Well,Index_Plate_Well,I7_Index_ID,index,I5_Index_ID,index2,Sample_Project,Sample_Species,Sample_Ref,panel,annotate
 34D,,,,D01,UDI0004,GAGACGAT,UDI0004,ACCGGTTA,2021_046,human,hg38,comprehensive,y                                                                      
 49D,,,,E02,UDI0013,TACGCTAC,UDI0013,CGTGTGAT,2021_046,human,hg38,comprehensive,y                                                                      
 P1017_3,,,,F12,UDI0094,AACCGTTC,UDI0094,CTAGCTCA,2021_038,human,hg38,core,y                                                                           
