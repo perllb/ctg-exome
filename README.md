@@ -1,5 +1,6 @@
 # ctg-exome 
-## nextflow pipeline for exome analysis with Illumina Dragen server
+
+Nextflow pipeline for exome analysis with Illumina Dragen server
 
 ## The following steps are performed by the pipeline:
 
