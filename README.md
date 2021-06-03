@@ -4,7 +4,7 @@ Nextflow pipeline for exome analysis with Illumina Dragen server
 
 ## The following steps are performed by the pipeline:
 
-* `Demultiplexing` (dragen bcl-conversion): Converts raw basecalls to fastq, and demultiplex samples based on index. Adapters sequences are trimmed if added to samplesheet [Settings].
+* `Demultiplexing` (dragen bcl-conversion): Converts raw basecalls to fastq, and demultiplex samples based on index. Adapters are trimmed if added to samplesheet [Settings].
 * `Alignment` and `Variant calling` (dragen align + calling): Fastq from each sample is aligned to the reference genome. Variants (SNV) are called in the target region. 
 * `Dragen metrics`: Compiling Dragen alignment and coverage metrics to table.
 * `FastQC`: FastQC calculates quality metrics on raw sequencing reads (https://www.bioinformatics.babraham.ac.uk/projects/fastqc/). 
