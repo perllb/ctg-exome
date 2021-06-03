@@ -75,7 +75,7 @@ Note that the format is standard IEM generated sheet, with additional columns:
 | Sample_Species | human / mouse |
 | Sample_Ref | hg37 / hg38 / mm10 : hg37, hg38 and mm10 are currently set up on dragen |
 | panel | comprehensive / core : Twist-Comprehensive or Twist-Core panel bed files are embedded in container |
-| annotate | y / n : set 'y' if nirvana annotation should be performed |
+| annotate | y / n : set 'y' for nirvana annotation |
 
 ## Container
 - `ngs-tools` Singularity container contain NGS-related tools, embedded in the repo: 
