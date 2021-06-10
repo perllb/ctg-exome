@@ -90,15 +90,14 @@ echo "$id,$c" >> ${outdir}/${projid}.stats_uniform.cov.txt
 
 ## Aligned reads
 f=$(cat $file | grep "Aligned reads," | cut -f4 -d",")
-aligned=$(echo 2 k $f 1000000 / p | dc)
-echo "$id,$aligned" >> ${outdir}/${projid}.stats_aligned.reads.txt
+echo "$id,$f" >> ${outdir}/${projid}.stats_aligned.reads.txt
 
 ## Q30 bases
 mmet="${dragendir}/${id}/$id.mapping_metrics.csv"
 g=$(cat $mmet | grep "Q30 bases," | grep SUMMARY | cut -f5 -d",")
 echo "$id,$g" >> ${outdir}/${projid}.stats_Q30.bases.txt
 
-echo "$id,${a}%,${b}x,$c,$aligned,${g}%" >> ${outdir}/${projid}.stats_merged.csv
+echo "$id,${a}%,${b}x,$c,$f,${g}%" >> ${outdir}/${projid}.stats_merged.csv
 
 done
 
@@ -135,7 +134,7 @@ echo "#         format: '{:.2f}'" >> $mqcfile
 echo "#     col5:" >> $mqcfile
 echo "#         title: 'Aligned Reads'" >> $mqcfile 
 echo "#         description: 'Total Aligned Reads to Reference genome'" >> $mqcfile 
-echo "#         format: '{:.2f}'" >> $mqcfile 
+echo "#         format: '{:,.0f}'" >> $mqcfile 
 echo "#         suffix: ' M'" >> $mqcfile
 echo "#     col6:" >> $mqcfile
 echo "#         title: 'Q30'" >> $mqcfile 

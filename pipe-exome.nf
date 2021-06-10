@@ -12,6 +12,7 @@ CTGQC = params.ctgqc
 demux = params.demux
 b2farg = params.bcl2fastq_arg
 index = params.index
+nirvanadir = params.nirvanadir
 
 // Read and process sample sheet
 sheet = file(params.sheet)
@@ -60,7 +61,7 @@ println "============================="
 Channel
     .fromPath(channel_sheet)
     .splitCsv(header:true)
-    .map { row -> tuple( row.Sample_ID, row.Sample_Project, row.Sample_Species, row.panel, row.analyze ) }
+    .map { row -> tuple( row.Sample_ID, row.Sample_Project, row.Sample_Species, row.Sample_Ref, row.panel, row.annotate ) }
     .unique()
     .tap{infoSamples}
     .into{ move_fastq_csv; analyze_csv  }
@@ -69,7 +70,7 @@ Channel
 Channel
     .fromPath(channel_sheet)
     .splitCsv(header:true)
-    .map { row -> tuple(  row.Sample_Project, row.panel, row.analyze ) }
+    .map { row -> tuple(  row.Sample_Project, row.panel ) }
     .unique()
     .tap{infoProjects}
     .set{ dragen_summary  }
@@ -136,7 +137,7 @@ process moveFastq {
 
     input:
     val x from mv_fastq
-    set sid, projid, ref, panel, analyze from move_fastq_csv
+    set sid, projid, species, ref, panel, annotate from move_fastq_csv
 
     output:
     val "y" into run_analysis
@@ -185,15 +186,13 @@ process dragen_align_vc {
 
     input:
     val x from run_analysis
-    set sid, projid, ref, panel, analyze from analyze_csv
+    set sid, projid, species, ref, panel, annotate from analyze_csv
 
     output:
     val x into done_analyze
     val projid into dragen_metrics
+    set sid, projid, species, ref, annotate, val("${OUTDIR}/${projid}/dragen/vcf/${sid}/${sid}.hard-filtered.vcf.gz"), val("${OUTDIR}/${projid}/dragen/vcf/${sid}/${sid}.diploidSV.vcf.gz") into annotate_vcf
     
-    when:
-    analyze == "y"
-
     """
     export LC_ALL=C
 
@@ -216,7 +215,13 @@ process dragen_align_vc {
         targetfile='ERR'
     fi
 
-    outdir=${OUTDIR}/${projid}/dragen/${sid}
+    dragendir=${OUTDIR}/${projid}/dragen/
+    mkdir -p \$dragendir
+    mkdir -p \${dragendir}/metrics
+    mkdir -p \${dragendir}/vcf/
+    mkdir -p \${dragendir}/vcf/${sid}
+
+    outdir=\${dragendir}/metrics/${sid}
     mkdir -p \$outdir
 
     echo "R1: '\${R1}'"
@@ -226,7 +231,7 @@ process dragen_align_vc {
     echo "outdir: '\${outdir}'"
     echo "targetfile: '\${targetfile}'"
    
-    /opt/edico/bin/dragen -f -r /staging/human/reference/$ref \\
+    /opt/edico/bin/dragen -f -r /staging/$species/reference/$ref \\
         -1 \${R1} \\
         -2 \${R2} \\
         --RGID ${projid}_${sid} \\
@@ -234,7 +239,6 @@ process dragen_align_vc {
         --intermediate-results-dir /staging/tmp/ \\
         --enable-map-align true \\
         --enable-map-align-output true \\
-        --remove-duplicates true \\
         --vc-target-bed \$targetfile \\
         --vc-target-bed-padding ${params.padding} \\
         --output-format bam \\
@@ -242,15 +246,57 @@ process dragen_align_vc {
         --enable-variant-caller true \\
         --enable-sv true \\
         --output-file-prefix $sid \\
+        --remove-duplicates true \\
         --qc-coverage-region-1 \$targetfile \\
 	--qc-coverage-region-padding-1 ${params.padding} \\
         --qc-coverage-ignore-overlaps true \\
         --qc-coverage-filters-1 "mapq<30,bq<20"
-	    
+	
+    # move vcfs to vcf dir     
+    # SNV
+    mv \${outdir}/${sid}.hard-filtered.vcf.gz \${dragendir}/vcf/${sid}/
+    # SV
+    mv \${outdir}/sv/results/variants/diploidSV.vcf.gz \${dragendir}/vcf/${sid}/${sid}.diploidSV.vcf.gz
     """
 }
 
+// Annotate vcf
+process annotate {
 
+	tag "${sid}"
+	label 'dragen' 	
+
+	input:
+	set sid, projid, species, ref, annotate, snv, sv from annotate_vcf
+	
+	output:
+	set sid, projid, species, ref, annotate into filter_vcf
+
+	when:
+	annotate == 'y'
+
+	"""
+	nirvanaref=$nirvanadir/$ref/
+
+	vcfdir='${OUTDIR}/${projid}/dragen/vcf/$sid'
+
+	outSNV_BN=\$(basename $snv .vcf.gz)
+	outSV_BN=\$(basename $sv .vcf.gz)
+	
+	outSNV=\$vcfdir/\${outSNV_BN}.annotated.nirvana.txt
+	outSV=\$vcfdir/\${outSV_BN}.annotated.nirvana.txt
+
+	# Convert hg37/38 to GRCh37/8 
+	Gref=\$(echo $ref | sed 's/hg/GRCh/')	
+
+	# SNV annotate
+	/opt/edico/share/nirvana/Nirvana -c \$nirvanaref/Cache/\$Gref/Both -r \$nirvanaref/References/Homo_sapiens.\$Gref.Nirvana.dat --sd \$nirvanaref/SupplementaryAnnotation/\$Gref -i $snv -o \$outSNV
+
+	# SNV annotate		 
+	/opt/edico/share/nirvana/Nirvana -c \$nirvanaref/Cache/\$Gref/Both -r \$nirvanaref/References/Homo_sapiens.\$Gref.Nirvana.dat --sd \$nirvanaref/SupplementaryAnnotation/\$Gref -i $sv -o \$outSV
+
+	"""
+}
 
 
 // fastqc 
@@ -294,7 +340,7 @@ process dragen_stats {
 
 	input: 
 	val "y" from dragen_metrics.collect()
-	set projid, panel, analyze from dragen_summary.unique()
+	set projid, panel  from dragen_summary.unique()
 	
 	output:
 	val projid into multiqc_dragen
