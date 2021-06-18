@@ -152,7 +152,7 @@ P1017_4,,,,G12,UDI0095,TGGTACAG,UDI0095,TCGAGAGT,2021_038,mm10,core,y
 Note that the format is standard IEM generated sheet, with additional columns:
 | Column | Supported values |
 | ------ | -------- |
-| Sample_Ref | hg37 / hg38 / mm10 : hg37, hg38 and mm10 are currently set up on dragen |
+| Sample_Ref | hg38 / mm10 : hg38 and mm10 are currently set up on dragen |
 | panel | comprehensive / core : Twist-Comprehensive or Twist-Core panel bed files are embedded in container |
 | annotate | y / n : set 'y' for nirvana annotation |
 
