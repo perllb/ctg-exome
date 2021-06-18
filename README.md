@@ -29,7 +29,7 @@ By default, the following filters are applied for coverage reports:
 - hg38
 - hg37
 - mm10
-- Custom references can be added in config file (add "custom" to the "panel" column in samplesheet)
+- Custom references can be added in config file (set "panel" column to "custom" in samplesheet, and add customgenome=/path/to/custom/reference in nextflow.config)
 
 
 ### Output:
