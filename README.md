@@ -12,6 +12,81 @@ Nextflow pipeline for exome analysis with Illumina Dragen server
 * `FastQC`: FastQC calculates quality metrics on raw sequencing reads (https://www.bioinformatics.babraham.ac.uk/projects/fastqc/). 
 * `MultiQC`: Summarizes FastQC and Dragen metrics into one document (https://multiqc.info/).
 
+
+## USAGE (manual run with nextflow)
+Alternative is to run with driver (see below). 
+
+1. Clone and build the Singularity container for this pipeline: (https://github.com/perllb/ctg-exome/tree/master/container). 
+2. Edit the nextflow.config file to fit your project and system. Set directory from where you want to run nextflow (containing config and samplesheet) as `basedir`. (from where you execute the pipeline).
+3. Set up `slide_area.txt` file and prepare slide .gpr file. See below for info.
+4. Edit your samplesheet to match the example samplesheet
+5. Run pipeline 
+```
+nohup nextflow run pipe-exome.nf > log.pipe-exome.txt &
+```
+
+## USAGE with driver 
+For automated execution of pipeline and workflow.
+
+- Must be started from within runfolder root directory.
+- Needs:
+ 1. Runfolder (from where it is started)
+ 2. Samplesheet (with format as specified in ***Example Samplesheet*** below). If not specified, driver will take `runfolder/CTG_SampleSheet.csv` from runfolder.
+ 3. Genome reference on dragen. Must be in /staging/$species/reference/$ref. (Species is extracted from `ref` field in SampleSheet (hg* = human, mm* = mouse)
+ 4. Nirvana annotation. Must be set up before run, and path to nirvanadir must be added to config.
+ 5. Target bed files. Defined path in nextflow.config
+ 
+```
+Usage: exome-driver [ -i META_ID ] [ -s SAMPLESHEET ] [ -a INDEX-TYPE ] [ -b BCL2FASTQ-ARG ] [ -r RESUME ] [ -c CUSTOM-GENOME ] [ -t CUSTOM-TARGET ] [ -p\
+ PADDING ] [ -d DEMUX-OFF ] [ -h HELP ]                                                                                                        
+
+
+    Optional arguments:                                                                                                                             
+    META-ID    -i : Set 'meta-id' for runfolder (e.g. 210330-10x). Default: Takes date of runfolder + run ID in runfolder name and adds exome as suffi\
+x. E.g. '210330_A00681_0334_AHWFKTDMXX' becomes 210330_0334-exome                                                                                   
+    SAMPLESHEET   -s : Set samplesheet used for run (Default: CTG_SampleSheet.csv)                                                                   
+    INDEX-TYPE    -a : Set -a if single index uses. (Default: dual)                                                                     
+    BCL2FASTQ-ARG -b : String with bcl2fastq argument. e.g. '--minimum-trimmed-read-length 20 --mask-short-adapter-reads 20' 
+    RESUME        -r : Set if to resume nf-pipeline                          
+    CUSTOM-GENOME -c : Path to custom reference genome if needed. Skip if human/mouse defined in samplesheet 
+    CUSTOM-TARGET -t : Path to custom target bed file if TWIST Comprehensive or Core is not used. Skip if core/comprehensive is defined in samplesheet
+    PADDING       -p : Set bp padding around target coordinates (default: 20) 
+    DEMUX-OFF     -d : Set flag to skip mkfastq (then fastq must be in FQDIR)
+    HELP          -h : print help message
+```
+
+***Run driver with default settings***
+This requires the current files and directories to be in correct name and location:
+- `CTG_SampleSheet.csv` in runfolder
+
+```
+cd runfolder 
+exome-driver
+```
+
+***Run driver with single-index samples and bcl2fastq-arguments location***
+```
+cd runfolder 
+exome-driver -a -b '--minimum-trimmed-read-length 20 --mask-short-adapter-reads 20' 
+```
+
+***Run driver with specific samplesheet (not CTG_SampleSheet.csv in runfolder)***
+```
+cd runfolder 
+exome-driver -s /path/to/customsheet.csv
+```
+
+## Functions of exome-driver
+1. Creates project folder, containing:
+   - nextflow.config (copied from ctg-exome pipeline dir, and edited based on default driver params and user-specified parameters)
+   - pipe-exome.nf (copied from ctg-exome pipeline dir)
+   - samplesheet (copied from the one specified in driver)
+2. Creates pipeline output directory
+   - default is specified in driver script (/projets/fs1/nas-sync/ctg-delivery/exome/<metaid>)
+3. Creates QC log output directory
+   - in which qc output of pipeline is copied 
+4. Starts pipe-exome.nf
+
 **Currently supports the following panels**
 - `Twist Core Exome` (https://www.twistbioscience.com/resources/bed-file/ngs-human-core-exome-panel-bed-files)   
 - `Twist Comprehensive Exome`: (https://www.twistbioscience.com/resources/bed-file/twist-human-comprehensive-exome-panel-bed-files)
@@ -27,7 +102,6 @@ By default, the following filters are applied for coverage reports:
 
 **Currently supports the following references**
 - hg38
-- hg37
 - mm10
 - Custom references can be added in config file (set "panel" column to "custom" in samplesheet, and add customgenome=/path/to/custom/reference in nextflow.config)
 
