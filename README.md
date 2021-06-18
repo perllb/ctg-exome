@@ -19,6 +19,12 @@ Nextflow pipeline for exome analysis with Illumina Dragen server
 **Padding**
 Default padding is 20bp. Can be altered in nextflow.config.
 
+**Filters for Coverage Reports**
+By default, the following filters are applied for coverage reports:
+- `--remove-duplicates true`: Duplicate reads are ignored
+- `--qc-coverage-ignore-overlaps true`: Resolve all of the alignments for each fragment and avoid double-counting any overlapping bases
+- `--qc-coverage-filters-1 "mapq<20,bq<20"`: Reads with MAPQ<20 and BQ<20 are ignored
+
 **Currently supports the following references**
 - hg38
 - hg37
