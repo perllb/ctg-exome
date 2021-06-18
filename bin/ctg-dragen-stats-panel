@@ -73,8 +73,8 @@ echo "" > ${outdir}/${projid}.stats_merged.csv
 echo "ID,Pct_Target,Avg_Cov,Uniformity,Aligned_reads,Q30" > ${outdir}/${projid}.stats_merged.csv
 
 
-for file in $(ls ${dragendir}/*/*.target_bed_coverage_metrics.csv )
-do id=$(basename $file .target_bed_coverage_metrics.csv )
+for file in $(ls ${dragendir}/*/*.qc-coverage-region-1_coverage_metrics.csv )
+do id=$(basename $file .qc-coverage-region-1_coverage_metrics.csv )
 
 ## Pct. on target
 a=$(cat $file | grep "Aligned reads in target region" | cut -f5 -d",")

@@ -1,0 +1,244 @@
+#!/bin/bash
+
+#####################
+# exome driver #
+#####################
+
+### This script will 
+### * Run the exome pipeline on data in current runfolder
+### * Modify standard nextflow.config to project specific 
+### * Generate project folder in shared/ctg-delivery/exome
+###  -> Here it will store nextflow.config, nf-pipeline, samplesheet in ctg-log 
+###  -> Write pipeline output 
+### * nf-Pipeline writes qc to shared/ctg-qc/exome
+
+# Initialize variables
+runfolder=$(pwd)
+run=$(basename $runfolder)
+demux="ON"
+resume='n'
+index='dual'
+padding=20
+
+
+# usage message 
+usage() {
+
+    echo ""
+    echo "Usage: exome-driver [ -i META_ID ] [ -s SAMPLESHEET ] [ -a INDEX-TYPE ] [ -b BCL2FASTQ-ARG ] [ -r RESUME ] [ -c CUSTOM-GENOME ] [ -t CUSTOM-TARGET ] [ -p PADDING ] [ -d DEMUX-OFF ] [ -h HELP ] "  1>&2
+    echo ""
+    echo ""
+    echo "Optional arguments: "
+    echo "META-ID    -i : Set 'meta-id' for runfolder (e.g. 210330-10x). Default: Takes date of runfolder + run ID in runfolder name and adds exome as suffix. E.g. '210330_A00681_0334_AHWFKTDMXX' becomes 210330_0334-exome "
+    echo "SAMPLESHEET   -s : Set samplesheet used for run (Default: CTG_SampleSheet.csv) "
+    echo "INDEX-TYPE    -a : Set -a if single index uses. (Default: dual) "  
+    echo "BCL2FASTQ-ARG -b : String with bcl2fastq argument. e.g. '--minimum-trimmed-read-length 20 --mask-short-adapter-reads 20' "
+    echo "RESUME        -r : Set if to resume nf-pipeline"
+    echo "CUSTOM-GENOME -c : Path to custom reference genome if needed. Skip if human/mouse defined in samplesheet "
+    echo "CUSTOM-TARGET -t : Path to custom target bed file if TWIST Comprehensive or Core is not used. Skip if core/comprehensive is defined in samplesheet "
+    echo "PADDING       -p : Set bp padding around target coordinates (default: 20)" 
+    echo "DEMUX-OFF     -d : Set flag to skip mkfastq (then fastq must be in FQDIR) "
+    echo "HELP          -h : print help message" 
+   
+}
+
+exit_abnormal() {
+    usage
+    exit 1
+}
+
+# Read and control input arguments 
+while getopts i:s:b:ac:t:p:rdh opt; do
+    case $opt in
+	i) id=$OPTARG
+	    ;;
+	s) sheet=$OPTARG
+	    ;;
+	a) index="single"
+	    ;;
+	b) b2farg=$OPTARG
+	    ;;
+	r) resume="y"
+	    ;;
+	c) custom_genome=$OPTARG
+	    ;;
+	t) custom_target=$OPTARG
+	    ;;
+	p) padding=$OPTARG
+	    ;;
+	d) demux="OFF"
+	    ;;
+	h) exit_abnormal
+	    ;;
+	\?) echo "> Error: Invalid option -$OPTARG" >&2
+	    exit_abnormal ;;
+	:) echo "> Error: -${OPTARG} requires an argument: -i needs project-id and -s need samplesheet name! "
+	    exit_abnormal ;;
+    esac
+done
+
+## Check arguments
+shift "$(( OPTIND -1 ))"
+
+# Check meta-id
+if [ -z $id ]; then
+    echo ""; echo "> WARNING! No meta-ID specified"
+    metaid=$(echo $run | cut -f1,3 -d"_")
+    id="${metaid}-exome"
+    echo "- Using: '${id}'"
+fi
+
+# Check if meta-ID already exist
+if [ "$resume" == 'n' ] && [ -d /projects/fs1/shared/ctg-projects/exome/$id ]; then
+    # Prompt user to approve overwriting current exome project-folder
+    read -p "> WARNING: $id has been used before:
+
+The following directories already exist:
+- /projects/fs1/shared/ctg-projects/exome/$id 
+- /projects/fs1/shared/ctg-qc/exome/$id 
+- /projects/fs1/nas-sync/ctg-delivery/exome/$id 
+
+
+ Do you want to overwrite these folders? 
+
+(y/n)  ... : " prompt
+    if [[ $prompt != "y" ]]
+    then 
+	echo "> Exiting: Please provide new [ -i metaID ] !"
+	exit_abnormal
+    else
+	echo "> Deleting content of the folders.. "
+	rm -r /projects/fs1/shared/ctg-projects/exome/$id/*
+	rm -r /projects/fs1/shared/ctg-qc/exome/$id/*
+	rm -r /projects/fs1/nas-sync/ctg-delivery/exome/$id/*
+    fi
+else
+    echo "> Resuming project '$id' "
+fi
+# Check samplesheet name
+if [ -z $sheet ]; then
+    echo ""; echo "> WARNING! No samplesheet specified"
+    sheet="CTG_SampleSheet.csv"
+    echo "- Using 'CTG_SampleSheet.csv'"
+    if [ ! -f $sheet ]; then
+	echo "> Error: CTG_SampleSheet.csv does not exist (in current dir)"
+	echo "- Please specify correct samplesheet, or create a CTG_SampleSheet.csv in current runfolder"
+	exit_abnormal
+    fi
+fi
+
+##############
+# Print info #
+##############
+echo ""
+echo "> The following arguments are entered:"
+echo "ID               : $id"
+echo "Sheet            : $sheet"
+echo "Index-type       : ${index}-index"
+echo "Bcl2fastq arg    : '$b2farg'"
+echo "PADDING          : $padding "
+if [ -z $custom_genome ]; then
+    echo "Custom Genome    : NONE "
+else
+    echo "Custom Genome    : $custom_genome "
+fi
+if [ -z $custom_target ]; then
+    echo "Custom Target    : NONE "
+else
+    echo "Custom Target    : $custom_target "
+fi
+if [ $demux == "ON" ]; then
+    echo "Demux            : YES "
+else
+    echo "Demux            : NO "
+fi
+if [ $resume == "y" ]; then
+    echo "Resume           : YES "
+else
+    echo "Resume           : NO "
+fi
+
+echo ""
+echo "Runfolder          : $runfolder "
+echo "Project Logfolder  : /projects/fs1/shared/ctg-projects/exome/$id"
+echo "QC Logfolder       : /projects/fs1/shared/ctg-qc/exome/$id"
+echo "Output             : /projects/fs1/nas-sync/ctg-delivery/exome/$id"
+echo ""
+
+# Prompt user to approve running in current directory and input
+read -p "> WARNING: Can only be run from within runfolder! 
+
+- Are you in runfolder in which you want run? 
+- And is input described above correct ?  
+
+(y/n)  ... : " prompt
+if [[ $prompt != "y" ]]
+then 
+    echo "> Exiting: Go to runfolder!"
+    exit 0
+fi
+
+################
+# Set up files #
+################
+
+# Creating project dir for logging pipeline
+projdir="/projects/fs1/shared/ctg-projects/exome/$id/"
+mkdir -p $projdir
+
+# Copy nextflow script and config to project folder
+nf_pipe="/projects/fs1/shared/ctg-pipelines/ctg-exome/pipe-exome.nf"
+nf_bin="/projects/fs1/shared/ctg-pipelines/ctg-exome/bin"
+nf_config="/projects/fs1/shared/ctg-pipelines/ctg-exome/nextflow.config"
+
+cp $nf_pipe $projdir
+cp $nf_config $projdir
+cp -r $nf_bin $projdir
+
+# Edit config file
+proj_conf=$projdir/nextflow.config
+sed "s/xmetaidx/$id/g" $proj_conf > tmp.txt; mv tmp.txt $proj_conf
+sed "s/xrunx/$run/g" $proj_conf > tmp.txt; mv tmp.txt $proj_conf
+sed "s/xsamplesheetx/$sheet/g" $proj_conf > tmp.txt; mv tmp.txt $proj_conf
+sed "s/xbcl2fastqargx/$b2farg/g" $proj_conf > tmp.txt; mv tmp.txt $proj_conf
+sed "s/xindextypex/$index/g" $proj_conf > tmp.txt; mv tmp.txt $proj_conf
+sed "s/xpaddingx/$padding/g" $proj_conf > tmp.txt; mv tmp.txt $proj_conf
+if [ ! -z $custom_genome ]; then
+    sed "s/xcustomgenomex/$custom_genome/g" $proj_conf > tmp.txt; mv tmp.txt $proj_conf
+fi
+if [ ! -z $custom_target ]; then
+    sed "s/xcustomtargetx/$custom_target/g" $proj_conf > tmp.txt; mv tmp.txt $proj_conf
+fi
+if [ $demux == "ON" ];then
+    sed "s/xdemuxx/y/g" $proj_conf > tmp.txt; mv tmp.txt $proj_conf
+else
+    sed "s/xdemuxx/n/g" $proj_conf > tmp.txt; mv tmp.txt $proj_conf
+fi
+
+# Copy edited config to runfolder
+cp $proj_conf $runfolder
+# Copy samplesheet to project folder (ctg-projects..)
+cp $sheet $projdir
+
+#####################
+# Start nf-pipeline #
+#####################
+
+# Go to ctg-project folder to execute pipeline
+cd $projdir
+
+if [ $resume == "y" ]; then
+    nohup nextflow run $nf_pipe -resume > log.nf.exome.$id &
+else
+    nohup nextflow run $nf_pipe > log.nf.exome.$id &
+fi
+echo ""; echo ""
+echo "#################################"
+echo "# exome pipeline submitted #"
+echo "#################################"
+echo ""; echo "";
+
+
+
+
+

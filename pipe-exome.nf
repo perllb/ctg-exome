@@ -61,7 +61,7 @@ println "============================="
 Channel
     .fromPath(channel_sheet)
     .splitCsv(header:true)
-    .map { row -> tuple( row.Sample_ID, row.Sample_Project, row.Sample_Species, row.Sample_Ref, row.panel, row.annotate ) }
+    .map { row -> tuple( row.Sample_ID, row.Sample_Project, row.Sample_Ref, row.panel, row.annotate ) }
     .unique()
     .tap{infoSamples}
     .into{ move_fastq_csv; analyze_csv  }
@@ -137,7 +137,7 @@ process moveFastq {
 
     input:
     val x from mv_fastq
-    set sid, projid, species, ref, panel, annotate from move_fastq_csv
+    set sid, projid, ref, panel, annotate from move_fastq_csv
 
     output:
     val "y" into run_analysis
@@ -186,12 +186,12 @@ process dragen_align_vc {
 
     input:
     val x from run_analysis
-    set sid, projid, species, ref, panel, annotate from analyze_csv
+    set sid, projid, ref, panel, annotate from analyze_csv
 
     output:
     val x into done_analyze
     val projid into dragen_metrics
-    set sid, projid, species, ref, annotate, val("${OUTDIR}/${projid}/dragen/vcf/${sid}/${sid}.hard-filtered.vcf.gz"), val("${OUTDIR}/${projid}/dragen/vcf/${sid}/${sid}.diploidSV.vcf.gz") into annotate_vcf
+    set sid, projid, ref, annotate, val("${OUTDIR}/${projid}/dragen/vcf/${sid}/${sid}.hard-filtered.vcf.gz"), val("${OUTDIR}/${projid}/dragen/vcf/${sid}/${sid}.diploidSV.vcf.gz") into annotate_vcf
     
     """
     export LC_ALL=C
@@ -202,10 +202,18 @@ process dragen_align_vc {
     # Get target panel file
     if [ $panel == "comprehensive" ] || [ $panel == "Comprehensive" ]
     then
-        targetfile="/projects/fs1/shared/references/panels/TWIST/Twist_ComprehensiveExome_targets_${ref}.bed"
+	if [ $ref == 'hg38' ]; then
+	    targetfile=${params.target_twist_comprehensive_hg38}
+	elif [ $ref == 'mm10' ]; then
+	    targetfile=${params.target_twist_comprehensive_mm10}
+        fi
     elif [ $panel == "core" ] || [ $panel == "Core" ]
     then
-        targetfile="/projects/fs1/shared/references/panels/TWIST/Twist_Exome_Target_${ref}.bed"
+        if [ $ref == 'hg38' ]; then
+	    targetfile=${params.target_twist_core_hg38}
+	elif [ $ref == 'mm10' ]; then
+	    targetfile=${params.target_twist_core_mm10}
+        fi
     elif [ $panel == "custom"  ] || [ $panel == "Custom" ] 
     then
         targetfile=${params.custom_target}
@@ -213,6 +221,18 @@ process dragen_align_vc {
         echo '>PANEL NOT RECOGNIZED!'
 	echo 'in samplesheet - only 'comprehensive', 'core' and 'custom' can be specified in 'panel' section'
         targetfile='ERR'
+    fi
+
+    # Get species based on ref
+    if [[ $ref == hg* ]]
+    then 
+    	species='human'
+    elif [[ $ref == mm* ]]
+    then
+	species='mouse'
+    else
+        echo 'species cannot be extracted from reference: $ref'
+	exit 1;
     fi
 
     dragendir=${OUTDIR}/${projid}/dragen/
@@ -230,8 +250,9 @@ process dragen_align_vc {
     echo "padding: '${params.padding}'"
     echo "outdir: '\${outdir}'"
     echo "targetfile: '\${targetfile}'"
-   
-    /opt/edico/bin/dragen -f -r /staging/$species/reference/$ref \\
+    echo "species: '\${species}'"   
+
+    /opt/edico/bin/dragen -f -r /staging/\$species/reference/$ref \\
         -1 \${R1} \\
         -2 \${R2} \\
         --RGID ${projid}_${sid} \\
@@ -250,7 +271,7 @@ process dragen_align_vc {
         --qc-coverage-region-1 \$targetfile \\
 	--qc-coverage-region-padding-1 ${params.padding} \\
         --qc-coverage-ignore-overlaps true \\
-        --qc-coverage-filters-1 "mapq<30,bq<20"
+        --qc-coverage-filters-1 "mapq<20,bq<20"
 	
     # move vcfs to vcf dir     
     # SNV
@@ -267,10 +288,10 @@ process annotate {
 	label 'dragen' 	
 
 	input:
-	set sid, projid, species, ref, annotate, snv, sv from annotate_vcf
+	set sid, projid, ref, annotate, snv, sv from annotate_vcf
 	
 	output:
-	set sid, projid, species, ref, annotate into filter_vcf
+	set sid, projid, ref, annotate into filter_vcf
 
 	when:
 	annotate == 'y'
