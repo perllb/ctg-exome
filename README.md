@@ -37,13 +37,11 @@ For automated execution of pipeline and workflow.
  5. Target bed files. Defined path in nextflow.config
  
 ```
-Usage: exome-driver [ -i META_ID ] [ -s SAMPLESHEET ] [ -a INDEX-TYPE ] [ -b BCL2FASTQ-ARG ] [ -r RESUME ] [ -c CUSTOM-GENOME ] [ -t CUSTOM-TARGET ] [ -p\
- PADDING ] [ -d DEMUX-OFF ] [ -h HELP ]                                                                                                        
+Usage: exome-driver [ -i META_ID ] [ -s SAMPLESHEET ] [ -a INDEX-TYPE ] [ -b BCL2FASTQ-ARG ] [ -r RESUME ] [ -c CUSTOM-GENOME ] [ -t CUSTOM-TARGET ] [ -p PADDING ] [ -d DEMUX-OFF ] [ -h HELP ]                                                                                                        
 
 
     Optional arguments:                                                                                                                             
-    META-ID    -i : Set 'meta-id' for runfolder (e.g. 210330-10x). Default: Takes date of runfolder + run ID in runfolder name and adds exome as suffi\
-x. E.g. '210330_A00681_0334_AHWFKTDMXX' becomes 210330_0334-exome                                                                                   
+    META-ID    -i : Set 'meta-id' for runfolder (e.g. 210330-10x). Default: Takes date of runfolder + run ID in runfolder name and adds exome as suffix. E.g. '210330_A00681_0334_AHWFKTDMXX' becomes 210330_0334-exome                                                                                   
     SAMPLESHEET   -s : Set samplesheet used for run (Default: CTG_SampleSheet.csv)                                                                   
     INDEX-TYPE    -a : Set -a if single index uses. (Default: dual)                                                                     
     BCL2FASTQ-ARG -b : String with bcl2fastq argument. e.g. '--minimum-trimmed-read-length 20 --mask-short-adapter-reads 20' 
