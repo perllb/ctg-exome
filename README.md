@@ -142,17 +142,16 @@ Adapter,AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
 AdapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
 
 [Data]
-Sample_ID,Sample_Name,Sample_Plate,Sample_Well,Index_Plate_Well,I7_Index_ID,index,I5_Index_ID,index2,Sample_Project,Sample_Species,Sample_Ref,panel,annotate
-34D,,,,D01,UDI0004,GAGACGAT,UDI0004,ACCGGTTA,2021_046,human,hg38,comprehensive,y                                                                      
-49D,,,,E02,UDI0013,TACGCTAC,UDI0013,CGTGTGAT,2021_046,human,hg38,comprehensive,y                                                                      
-P1017_3,,,,F12,UDI0094,AACCGTTC,UDI0094,CTAGCTCA,2021_038,human,hg38,core,y                                                                           
-P1017_4,,,,G12,UDI0095,TGGTACAG,UDI0095,TCGAGAGT,2021_038,human,hg38,core,y   
+Sample_ID,Sample_Name,Sample_Plate,Sample_Well,Index_Plate_Well,I7_Index_ID,index,I5_Index_ID,index2,Sample_Project,Sample_Ref,panel,annotate
+34D,,,,D01,UDI0004,GAGACGAT,UDI0004,ACCGGTTA,2021_046,hg38,comprehensive,y                                                                      
+49D,,,,E02,UDI0013,TACGCTAC,UDI0013,CGTGTGAT,2021_046,hg38,comprehensive,y                                                                      
+P1017_3,,,,F12,UDI0094,AACCGTTC,UDI0094,CTAGCTCA,2021_038,mm10,core,y                                                                           
+P1017_4,,,,G12,UDI0095,TGGTACAG,UDI0095,TCGAGAGT,2021_038,mm10,core,y   
 ```
 
 Note that the format is standard IEM generated sheet, with additional columns:
 | Column | Supported values |
 | ------ | -------- |
-| Sample_Species | human / mouse |
 | Sample_Ref | hg37 / hg38 / mm10 : hg37, hg38 and mm10 are currently set up on dragen |
 | panel | comprehensive / core : Twist-Comprehensive or Twist-Core panel bed files are embedded in container |
 | annotate | y / n : set 'y' for nirvana annotation |
