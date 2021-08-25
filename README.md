@@ -18,6 +18,7 @@ Nextflow pipeline for exome analysis with Illumina Dragen server
 1. Samplesheet (`CTG_SampleSheet.exome.csv`)
 
 - The samplesheet format is standard IEM generated sheet, with additional columns added after [Data]:
+
 | Column | Supported values |
 | ------ | -------- |
 | Sample_Ref | hg38 / mm10 : hg38 and mm10 are currently set up for dragen |
