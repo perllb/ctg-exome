@@ -24,7 +24,8 @@ The samplesheet format is standard IEM generated sheet, with additional columns 
 | panel | comprehensive / core : Twist-Comprehensive or Twist-Core panel bed files are embedded in container |
 | annotate | y / n : set 'y' for nirvana annotation |
 
-## CSV format templates
+### CSV format templates
+
 ```
 [Header]
 IEMFileVersion,5
