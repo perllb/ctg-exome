@@ -13,6 +13,46 @@ Nextflow pipeline for exome analysis with Illumina Dragen server
 * `MultiQC`: Summarizes FastQC and Dragen metrics into one document (https://multiqc.info/).
 
 
+## Input files
+
+1. Samplesheet (`CTG_SampleSheet.exome.csv`)
+
+The samplesheet format is standard IEM generated sheet, with additional columns added after [Data]:
+| Column | Supported values |
+| ------ | -------- |
+| Sample_Ref | hg38 / mm10 : hg38 and mm10 are currently set up for dragen |
+| panel | comprehensive / core : Twist-Comprehensive or Twist-Core panel bed files are embedded in container |
+| annotate | y / n : set 'y' for nirvana annotation |
+
+## CSV format templates
+```
+[Header]
+IEMFileVersion,5
+Date,2021-04-29
+Workflow,GenerateFASTQ
+Application,NovaSeq FASTQ Only
+Instrument Type,NovaSeq
+Assay,TWIST
+"Index Adapters,""IDT- UD Indexes (96 Indexes)"""
+Chemistry,Amplicon
+
+[Reads]
+151
+151
+
+[Settings]
+Adapter,AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
+AdapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
+
+[Data]
+Sample_ID,Sample_Name,Sample_Plate,Sample_Well,Index_Plate_Well,I7_Index_ID,index,I5_Index_ID,index2,Sample_Project,Sample_Ref,panel,annotate
+34D,,,,D01,UDI0004,GAGACGAT,UDI0004,ACCGGTTA,2021_046,hg38,comprehensive,y                                                                      
+49D,,,,E02,UDI0013,TACGCTAC,UDI0013,CGTGTGAT,2021_046,hg38,comprehensive,y                                                                      
+P1017_3,,,,F12,UDI0094,AACCGTTC,UDI0094,CTAGCTCA,2021_038,mm10,core,y                                                                           
+P1017_4,,,,G12,UDI0095,TGGTACAG,UDI0095,TCGAGAGT,2021_038,mm10,core,y   
+```
+
+
 ## USAGE (manual run with nextflow)
 Alternative is to run with driver (see below). 
 
@@ -104,7 +144,7 @@ By default, the following filters are applied for coverage reports:
 - Custom references can be added in config file (set "panel" column to "custom" in samplesheet, and add customgenome=/path/to/custom/reference in nextflow.config)
 
 
-### Output:
+## Output:
 * CTG-output
     * `fastq`: Contains raw fastq files from demultiplexing.
     * `dragen`: 
@@ -119,40 +159,7 @@ By default, the following filters are applied for coverage reports:
         * dragen metrics: Summarized metrics for each sample.
         * multiqc output: Summarizing FastQC, dragen metrics and demultiplexing (https://multiqc.info/)
 
-## Example Samplesheet
-```
-[Header]
-IEMFileVersion,5
-Date,2021-04-29
-Workflow,GenerateFASTQ
-Application,NovaSeq FASTQ Only
-Instrument Type,NovaSeq
-Assay,TWIST
-"Index Adapters,""IDT- UD Indexes (96 Indexes)"""
-Chemistry,Amplicon
 
-[Reads]
-151
-151
-
-[Settings]
-Adapter,AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
-AdapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
-
-[Data]
-Sample_ID,Sample_Name,Sample_Plate,Sample_Well,Index_Plate_Well,I7_Index_ID,index,I5_Index_ID,index2,Sample_Project,Sample_Ref,panel,annotate
-34D,,,,D01,UDI0004,GAGACGAT,UDI0004,ACCGGTTA,2021_046,hg38,comprehensive,y                                                                      
-49D,,,,E02,UDI0013,TACGCTAC,UDI0013,CGTGTGAT,2021_046,hg38,comprehensive,y                                                                      
-P1017_3,,,,F12,UDI0094,AACCGTTC,UDI0094,CTAGCTCA,2021_038,mm10,core,y                                                                           
-P1017_4,,,,G12,UDI0095,TGGTACAG,UDI0095,TCGAGAGT,2021_038,mm10,core,y   
-```
-
-Note that the format is standard IEM generated sheet, with additional columns:
-| Column | Supported values |
-| ------ | -------- |
-| Sample_Ref | hg38 / mm10 : hg38 and mm10 are currently set up on dragen |
-| panel | comprehensive / core : Twist-Comprehensive or Twist-Core panel bed files are embedded in container |
-| annotate | y / n : set 'y' for nirvana annotation |
 
 ## Container
 - `ngs-tools` Singularity container contain NGS-related tools, embedded in the repo: 
