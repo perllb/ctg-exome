@@ -14,9 +14,11 @@ Nextflow pipeline for exome analysis with Illumina Dragen server
 
 
 ## Input files
+The following files must be in the runfolder to start pipeline successfully.
 
 1. Samplesheet (`CTG_SampleSheet.exome.csv`)
 
+### Samplesheet requirements
 - The samplesheet format is standard IEM generated sheet, with additional columns added after [Data]:
 
 | Column | Supported values |
