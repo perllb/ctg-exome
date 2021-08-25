@@ -27,9 +27,9 @@ Nextflow pipeline for exome analysis with Illumina Dragen server
 
 - Also note that no Sample_Name should be added. Leave that column blank!
 
-### CSV format templates
+### Samplesheet template (.csv)
 
-1. Samplesheet: `CTG_SampleSheet.exome.csv`
+Samplesheet name: `CTG_SampleSheet.exome.csv`
 
 ```
 [Header]
