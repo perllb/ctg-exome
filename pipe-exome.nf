@@ -361,7 +361,7 @@ process dragen_stats {
 
 	input: 
 	val "y" from dragen_metrics.collect()
-	set projid, panel  from dragen_summary.unique()
+	set projid, panel from dragen_summary.unique()
 	
 	output:
 	val projid into multiqc_dragen
@@ -380,7 +380,6 @@ process dragen_stats {
     fi
 
 	mkdir -p ${OUTDIR}/$projid/qc/dragen
-
 	${basedir}/bin/ctg-dragen-stats-panel -p $projid -i ${OUTDIR}/$projid/dragen/ -o ${OUTDIR}/$projid/qc/dragen/ -t \$targetfile -a ${params.padding}
 	
 	"""
@@ -399,7 +398,7 @@ process multiqc {
     """
     
     cd $OUTDIR
-    multiqc -f ${OUTDIR}/$projid/  --outdir ${OUTDIR}/$projid/qc/multiqc/ -n ${projid}_exome_dragen_report.html
+    multiqc -f ${OUTDIR}/$projid/ --outdir ${OUTDIR}/$projid/qc/multiqc/ -n ${projid}_exome_dragen_report.html
 
     mkdir -p ${CTGQC}
     mkdir -p ${CTGQC}/$projid
@@ -422,7 +421,6 @@ process multiqc_run {
 
 	cd $OUTDIR
 	mkdir -p ${OUTDIR}/qc
-
 	multiqc -f ${OUTDIR} $params.runfolder/ctg-interop --outdir ${OUTDIR}/qc/ -n exome_dragen_run_${metaID}_multiqc_report.html
 
 	mkdir -p ${CTGQC}

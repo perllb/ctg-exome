@@ -73,11 +73,11 @@ echo "" > ${outdir}/${projid}.stats_merged.csv
 echo "ID,Pct_Target,Avg_Cov,Uniformity,Aligned_reads,Q30" > ${outdir}/${projid}.stats_merged.csv
 
 
-for file in $(ls ${dragendir}/*/*.qc-coverage-region-1_coverage_metrics.csv )
+for file in $(ls ${dragendir}/*/*/*.qc-coverage-region-1_coverage_metrics.csv )
 do id=$(basename $file .qc-coverage-region-1_coverage_metrics.csv )
 
 ## Pct. on target
-a=$(cat $file | grep "Aligned reads in target region" | cut -f5 -d",")
+a=$(cat $file | grep "Aligned reads in QC coverage region" | cut -f5 -d",")
 echo "$id,$a" >> ${outdir}/${projid}.stats_pct.target.txt
 
 ## Average coverage
@@ -93,7 +93,7 @@ f=$(cat $file | grep "Aligned reads," | cut -f4 -d",")
 echo "$id,$f" >> ${outdir}/${projid}.stats_aligned.reads.txt
 
 ## Q30 bases
-mmet="${dragendir}/${id}/$id.mapping_metrics.csv"
+mmet="${dragendir}/metrics/${id}/$id.mapping_metrics.csv"
 g=$(cat $mmet | grep "Q30 bases," | grep SUMMARY | cut -f5 -d",")
 echo "$id,$g" >> ${outdir}/${projid}.stats_Q30.bases.txt
 

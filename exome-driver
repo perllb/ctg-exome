@@ -80,13 +80,26 @@ done
 ## Check arguments
 shift "$(( OPTIND -1 ))"
 
-# Check meta-id
+# Check samplesheet name
+if [ -z $sheet ]; then
+    echo ""; echo "> WARNING! No samplesheet specified"
+    sheet="CTG_SampleSheet.exome.csv"
+    echo "- $sheet'"
+    if [ ! -f $sheet ]; then
+	echo "> Error: $sheet does not exist (in current dir)"
+	echo "- Please specify correct samplesheet, or create a $sheet in current runfolder"
+	exit_abnormal
+    fi
+fi
+
+# Check meta-id - assign project number if not specified
 if [ -z $id ]; then
-    echo ""; echo "> WARNING! No meta-ID specified"
-    metaid=$(echo $run | cut -f1,3 -d"_")
-    id="${metaid}-exome"
+    echo "> No meta-ID specified"
+    metaid=$(grep "ProjectID" $sheet | cut -f2 -d",")
+    id="${metaid}"
     echo "- Using: '${id}'"
 fi
+
 
 # Check if meta-ID already exist
 if [ "$resume" == 'n' ] && [ -d /projects/fs1/shared/ctg-projects/exome/$id ]; then
@@ -115,17 +128,7 @@ The following directories already exist:
 else
     echo "> Resuming project '$id' "
 fi
-# Check samplesheet name
-if [ -z $sheet ]; then
-    echo ""; echo "> WARNING! No samplesheet specified"
-    sheet="CTG_SampleSheet.csv"
-    echo "- Using 'CTG_SampleSheet.csv'"
-    if [ ! -f $sheet ]; then
-	echo "> Error: CTG_SampleSheet.csv does not exist (in current dir)"
-	echo "- Please specify correct samplesheet, or create a CTG_SampleSheet.csv in current runfolder"
-	exit_abnormal
-    fi
-fi
+
 
 ##############
 # Print info #
