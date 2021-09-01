@@ -19,7 +19,26 @@ The following files must be in the runfolder to start pipeline successfully.
 1. Samplesheet (`CTG_SampleSheet.exome.csv`)
 
 ### Samplesheet requirements
-- The samplesheet format is standard IEM generated sheet, with additional columns added after [Data]:
+
+- The samplesheet format is standard IEM generated sheet, with the following modifications:
+
+#### I. ProjectID added under [Header]:
+```
+[Header]
+ProjectID,2021_088,
+IEMFileVersion,5
+Date,2021-04-29
+..
+..
+```
+
+- Must be specified as **ProjectID,[project-id],**
+- Comma separated, no spaces.
+- Only **ProjectID** will work (not projectID or ProjectId)
+- The last comma, after the [project-id] is needed. 
+
+
+#### II. Additional columns added after [Data]:
 
 | Column | Supported values |
 | ------ | -------- |
@@ -35,6 +54,7 @@ Samplesheet name: `CTG_SampleSheet.exome.csv`
 
 ```
 [Header]
+ProjectID,2021_088,
 IEMFileVersion,5
 Date,2021-04-29
 Workflow,GenerateFASTQ
