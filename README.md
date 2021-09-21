@@ -42,8 +42,8 @@ Date,2021-04-29
 
 | Column | Supported values |
 | ------ | -------- |
-| Sample_Ref | hg38 / mm10 : hg38 and mm10 are currently set up for dragen |
-| panel | comprehensive / core : Twist-Comprehensive or Twist-Core panel bed files are embedded in container |
+| Sample_Ref | hg38 / hg19 / mm10 : hg38, hg19 and mm10 are currently set up for dragen |
+| panel | comprehensive / core : Twist-Comprehensive-Exome or Twist-Core-Exome panel bed files (hg38 and hg19) are embedded in container |
 | annotate | y / n : set 'y' for nirvana annotation |
 
 - Also note that no Sample_Name should be added. Leave that column blank!
