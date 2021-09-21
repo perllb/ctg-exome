@@ -194,7 +194,7 @@ By default, the following filters are applied for coverage reports:
 https://github.com/perllb/ctg-wgs/tree/master/container 
 
 ## References
-- Dragen version: 3.8
+- Dragen version: 3.9
     - User guide: (https://support.illumina.com/content/dam/illumina-support/documents/documentation/software_documentation/dragen-bio-it/Illumina-DRAGEN-Bio-IT-Platform-User-Guide-1000000141465-00.pdf). 
     - Relase notes: (https://support.illumina.com/content/dam/illumina-support/documents/downloads/software/dragen/Illumina-DRAGEN-Bio-IT-Platform-3.7-Release-Notes-1000000142362-v00.pdf)
 - Nirvana annotator: https://illumina.github.io/NirvanaDocumentation/
